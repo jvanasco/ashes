@@ -151,6 +151,8 @@ def parse_args():
                      help='pop a pdb.post_mortem() on exceptions')
     prs.add_argument('--benchmark', action='store_true',
                      help='run benchmarks')
+    prs.add_argument('--benchtest', action='store_true',
+                     help='run testing benchmark')
     prs.add_argument('--run_unittests', action='store_true',
                      help='run unittests')
     prs.add_argument('--disable_core', action='store_true',
@@ -165,6 +167,13 @@ def main(width=DEFAULT_WIDTH):
     run_benchmarks = args.benchmark or False
     run_unittests = args.run_unittests or False
     disable_core = args.disable_core or False
+    
+    run_benchtest = args.benchtest or False
+    if run_benchtest:
+        disable_core = True
+        run_benchmarks = False
+        run_unittests = False
+    
     if not disable_core:
         if not name:
             # remember `tests` is a namespace. don't overwrite!
@@ -198,9 +207,13 @@ def main(width=DEFAULT_WIDTH):
             results = runner.run(big_suite)
     # toggled!
     if run_benchmarks:
+        tests.benchmarks.bench_render_repeat()
         tests.benchmarks.bench_render_a()
         tests.benchmarks.bench_cacheable_templates()
 
+    if run_benchtest:
+        import tests.utils_profiling
+        tests.utils_profiling.profile_function(tests.benchmarks.bench_render_repeat)
 
 if __name__ == '__main__':
     main()

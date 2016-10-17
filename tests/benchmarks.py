@@ -16,10 +16,45 @@ __all__ = ['bench_render_a', 'bench_cacheable_templates', ]
 # ==============================================================================
 
 
+def bench_render_repeat():
+    """
+    this bench is designed as a baseline for performance comparisons when
+    adjusting the code.
+    A single template loader is re-used
+    """
+    print("running benchmarks: bench_render_a...")
+    if utils.ChertDefaults is None:
+        utils.ChertDefaults = utils._ChertDefaults()
+
+    _ashesLoader = ashes.TemplatePathLoader(utils._chert_dir)
+    _ashesEnv = ashes.AshesEnv(loaders=(_ashesLoader, ))
+
+    def test_baseline_chert():
+        """
+        test_baseline_chert
+        this just runs though all the chert templates using a default `TemplatePathLoader`
+        """
+        renders = {}
+        for (fname, fdata) in utils.ChertDefaults.chert_data.items():
+            rendered = _ashesEnv.render(fname, fdata)
+            renders[fname] = fdata
+
+    timed = {}
+    ranged = range(0, 1000)
+    timed["baseline_chert"] = []
+    for i in ranged:
+        t_start = time.time()
+        test_baseline_chert()
+        t_fin = time.time()
+        timed["baseline_chert"] .append(t_fin - t_start)
+    utils.print_timed(timed)
+
+
 def bench_render_a():
     """
     this bench is designed as a baseline for performance comparisons when
-    adjusting the code
+    adjusting the code.
+    A new template loader is created.
     """
     print("running benchmarks: bench_render_a...")
     if utils.ChertDefaults is None:

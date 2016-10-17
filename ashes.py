@@ -955,11 +955,19 @@ def escape_uri_component(text):
             .replace('&', '%26'))
 
 
-def escape_html(text):
-    text = to_unicode(text)
-    # TODO: dust.js doesn't use this, but maybe we should:
-    # .replace("'", '&squot;')
-    return cgi.escape(text, True)
+def _escape_html_factory():
+    """
+    slightly optimized for the cPython interpreter.
+    this turns the constant lookup for global cgi + attribute escape
+    into a local cgi_escape variable.
+    """
+    def escape_html(text, cgi_escape=cgi.escape):
+        text = to_unicode(text)
+        # TODO: dust.js doesn't use this, but maybe we should:
+        # .replace("'", '&squot;')
+        return cgi_escape(text, True)
+    return escape_html
+escape_html = _escape_html_factory()
 
 
 def escape_js(text):
