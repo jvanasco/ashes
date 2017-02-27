@@ -1322,6 +1322,17 @@ class Context(object):
                     ctx = ctx.head[first_path_element]
                 else:
                     ctx = UndefinedValue
+            
+            if ctx == UndefinedValue:
+                # try to load the ctx from the env globals
+                # instead of checking for the presences of
+                # self.env + self.env.env_globals self.env.env_globals[first_path_element]
+                # just try to load the full path and catch the exception gracefully
+                # more than twice as fast, FTW
+                try:
+                    ctx = self.env.env_globals[first_path_element]
+                except:
+                    pass
 
             i = 1
             while ctx and ctx is not UndefinedValue and i < length:
@@ -2116,10 +2127,13 @@ class BaseAshesEnv(object):
                  special_chars=None,
                  optimizers=None,
                  pragmas=None,
-                 auto_reload=True):
+                 auto_reload=True,
+                 env_globals=None,
+                 ):
         self.templates = {}
         self.loaders = list(loaders or [])
         self.filters = dict(DEFAULT_FILTERS)
+        self.env_globals = env_globals
         if filters:
             self.filters.update(filters)
         self.helpers = dict(DEFAULT_HELPERS)
